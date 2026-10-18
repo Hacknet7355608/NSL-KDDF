@@ -1,4 +1,3 @@
-@'
 # Python
 __pycache__/
 *.py[cod]
@@ -22,4 +21,3 @@ docs/
 
 # 注意：data/ 由 DVC 管理，dvc add 会自动生成 data/raw/.gitignore，
 # 这里不重复写 data 规则，避免和 DVC 的忽略文件打架
-'@ | Set-Content -Encoding UTF8 .gitignore
