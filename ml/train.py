@@ -9,6 +9,7 @@
     python ml/train.py --config ml/configs/improved.json       # 只跑一个
     mlflow ui --backend-store-uri ./mlruns                     # 打开实验面板
 """
+
 from __future__ import annotations
 
 import argparse
@@ -78,8 +79,9 @@ def save_confusion_matrix(y_true, y_pred, classes, path: Path) -> bool:
 
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
-        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
-        plt.rcParams['axes.unicode_minus'] = False
+
+        plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
+        plt.rcParams["axes.unicode_minus"] = False
     except ImportError:
         return False
 
@@ -95,8 +97,15 @@ def save_confusion_matrix(y_true, y_pred, classes, path: Path) -> bool:
     ax.set_title("混淆矩阵（测试集）")
     for i in range(len(classes)):
         for j in range(len(classes)):
-            ax.text(j, i, str(matrix[i, j]), ha="center", va="center", fontsize=8,
-                    color="white" if matrix[i, j] > matrix.max() / 2 else "black")
+            ax.text(
+                j,
+                i,
+                str(matrix[i, j]),
+                ha="center",
+                va="center",
+                fontsize=8,
+                color="white" if matrix[i, j] > matrix.max() / 2 else "black",
+            )
     fig.tight_layout()
     fig.savefig(path, dpi=140)
     plt.close(fig)
@@ -140,7 +149,9 @@ def train_and_log_model(
         mlflow.log_metric("f1_macro", f1_macro)
 
         # 产物：模型本体（与课件一致）
-        mlflow.sklearn.log_model(model, name="model", skops_trusted_types=["sklearn.tree._tree.Tree"])
+        mlflow.sklearn.log_model(
+            model, name="model", skops_trusted_types=["sklearn.tree._tree.Tree"]
+        )
 
         # 产物：分类报告 + 混淆矩阵
         with tempfile.TemporaryDirectory() as tmp:
@@ -199,11 +210,15 @@ def main() -> None:
     mlflow.set_experiment(EXPERIMENT)
 
     X_train, y_train, X_test, y_test, eval_set = load_data()
-    print(f"训练集 {X_train.shape[0]} 行 / 特征 {X_train.shape[1]} 个；评估集 {len(X_test)} 行（{eval_set}）")
+    print(
+        f"训练集 {X_train.shape[0]} 行 / 特征 {X_train.shape[1]} 个；评估集 {len(X_test)} 行（{eval_set}）"
+    )
 
     if args.all:
-        configs = [json.loads(p.read_text(encoding="utf-8"))
-                   for p in sorted((ROOT / "ml" / "configs").glob("*.json"))]
+        configs = [
+            json.loads(p.read_text(encoding="utf-8"))
+            for p in sorted((ROOT / "ml" / "configs").glob("*.json"))
+        ]
     elif args.config:
         configs = [json.loads(Path(args.config).read_text(encoding="utf-8"))]
     else:
@@ -212,7 +227,10 @@ def main() -> None:
     results = []
     for cfg in configs:
         model, run_id, metrics = train_and_log_model(
-            X_train, y_train, X_test, y_test,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
             n_estimators=cfg["n_estimators"],
             max_depth=cfg["max_depth"],
             run_name=cfg["run_name"],
@@ -225,9 +243,11 @@ def main() -> None:
 
     print("\n=== 实验汇总 ===")
     for name, run_id, metrics in results:
-        print(f"{name:<10} accuracy={metrics['accuracy']:.4f} "
-              f"f1_weighted={metrics['f1_weighted']:.4f} f1_macro={metrics['f1_macro']:.4f} "
-              f"run_id={run_id}")
+        print(
+            f"{name:<10} accuracy={metrics['accuracy']:.4f} "
+            f"f1_weighted={metrics['f1_weighted']:.4f} f1_macro={metrics['f1_macro']:.4f} "
+            f"run_id={run_id}"
+        )
     print(f"MLflow 面板：mlflow ui --backend-store-uri {ROOT / 'mlruns'}")
 
 
