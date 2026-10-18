@@ -78,6 +78,8 @@ def save_confusion_matrix(y_true, y_pred, classes, path: Path) -> bool:
 
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
+        plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'DejaVu Sans']
+        plt.rcParams['axes.unicode_minus'] = False
     except ImportError:
         return False
 
@@ -138,7 +140,7 @@ def train_and_log_model(
         mlflow.log_metric("f1_macro", f1_macro)
 
         # 产物：模型本体（与课件一致）
-        mlflow.sklearn.log_model(model, "model")
+        mlflow.sklearn.log_model(model, name="model", skops_trusted_types=["sklearn.tree._tree.Tree"])
 
         # 产物：分类报告 + 混淆矩阵
         with tempfile.TemporaryDirectory() as tmp:
